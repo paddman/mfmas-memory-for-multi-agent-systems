@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NT MemoryVault</title>
+  <style>
+    :root {
+      --blue: #0057ff;
+      --blue-2: #1e7bff;
+      --ink: #0b1739;
+      --muted: #60708f;
+      --line: #dbe5f5;
+      --soft: #f4f8ff;
+      --danger: #c92a2a;
+      --ok: #087f5b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: #fff; }
+    header { padding: 24px 36px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: rgba(255,255,255,.96); backdrop-filter: blur(14px); z-index: 2; }
+    .brand { display: flex; gap: 12px; align-items: center; font-weight: 800; letter-spacing: -.02em; }
+    .mark { width: 36px; height: 36px; border-radius: 11px; background: linear-gradient(135deg, var(--blue), #58a6ff); box-shadow: 0 10px 30px rgba(0,87,255,.28); display: grid; place-items: center; color: white; font-weight: 900; }
+    .status { font-size: 13px; color: var(--ok); background: #eafaf4; border: 1px solid #bcebdc; padding: 8px 11px; border-radius: 999px; }
+    main { max-width: 1240px; margin: 0 auto; padding: 56px 28px 72px; }
+    .hero { display: grid; grid-template-columns: 1.25fr .75fr; gap: 28px; align-items: stretch; }
+    .hero h1 { font-size: clamp(42px, 7vw, 78px); line-height: .96; letter-spacing: -.06em; margin: 0 0 24px; max-width: 850px; }
+    .hero h1 span { color: var(--blue); }
+    .hero p { font-size: 19px; line-height: 1.65; color: var(--muted); max-width: 760px; margin: 0; }
+    .principle { border: 1px solid var(--line); background: linear-gradient(145deg, #fff, var(--soft)); border-radius: 24px; padding: 28px; display: flex; flex-direction: column; justify-content: space-between; min-height: 260px; }
+    .principle small { color: var(--blue); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .principle strong { display: block; font-size: 26px; line-height: 1.35; letter-spacing: -.03em; margin-top: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 38px; }
+    .metric { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: #fff; }
+    .metric b { display: block; font-size: 30px; margin-top: 8px; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    .panel { margin-top: 28px; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(33,74,145,.08); }
+    .panel-head { padding: 22px 24px; display: flex; gap: 12px; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); background: var(--soft); }
+    .panel-head h2 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    button { border: 0; border-radius: 12px; padding: 11px 15px; font-weight: 750; cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
+    button:hover { transform: translateY(-1px); }
+    .primary { color: #fff; background: var(--blue); box-shadow: 0 9px 24px rgba(0,87,255,.25); }
+    .secondary { color: var(--blue); background: #eaf2ff; }
+    .danger { color: var(--danger); background: #fff0f0; }
+    .content { display: grid; grid-template-columns: 1fr 1fr; min-height: 430px; }
+    .column { padding: 24px; }
+    .column + .column { border-left: 1px solid var(--line); }
+    .column h3 { margin: 0 0 16px; font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .card { border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 12px; background: #fff; }
+    .card .top { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .pill { display: inline-block; padding: 5px 8px; border-radius: 999px; background: #eaf2ff; color: var(--blue); font-size: 11px; font-weight: 800; }
+    .restricted { background: #fff0f0; color: var(--danger); }
+    .allowed { color: var(--ok); font-weight: 800; }
+    .denied { color: var(--danger); font-weight: 800; }
+    .muted { color: var(--muted); }
+    .empty { min-height: 250px; display: grid; place-items: center; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 16px; padding: 24px; }
+    .log { display: grid; grid-template-columns: 86px 1fr auto; gap: 12px; align-items: start; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .log:last-child { border-bottom: 0; }
+    .notice { margin-top: 16px; padding: 13px 15px; border-radius: 12px; background: #eef5ff; color: #204276; font-size: 13px; display: none; }
+    code { background: #eef3fb; padding: 2px 6px; border-radius: 6px; }
+    @media (max-width: 900px) { .hero, .content { grid-template-columns: 1fr; } .column + .column { border-left: 0; border-top: 1px solid var(--line); } .grid { grid-template-columns: 1fr; } header { padding: 18px; } main { padding: 36px 18px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><div class="mark">M</div><div>NT MemoryVault<br><small class="muted">Sovereign AI Continuity</small></div></div>
+    <div id="apiStatus" class="status">กำลังตรวจ API…</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1>AI จำงานต่อเนื่อง<br><span>แต่จำเท่าที่ควรจำ</span></h1>
+        <p>Persistent memory กลางสำหรับ Agent ทุก model และทุก framework พร้อมสิทธิ์การเข้าถึง Audit Trail และ Right to be Forgotten บน Sovereign Infrastructure</p>
+      </div>
+      <div class="principle">
+        <small>Product principle</small>
+        <strong>“Your AI can change.<br>Your organizational memory stays.”</strong>
+        <span class="muted">Model-agnostic · Policy-controlled · Auditable</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="metric"><span>Demo Subject</span><b>CUST-1001</b></div>
+      <div class="metric"><span>Agent Handover</span><b>Support → Sales</b></div>
+      <div class="metric"><span>Governance</span><b>Allow · Deny · Delete</b></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Customer Continuity Demo</h2>
+        <div class="actions">
+          <button class="primary" onclick="seedDemo()">1. Reset & Seed</button>
+          <button class="secondary" onclick="salesRetrieve()">2. Sales Retrieve</button>
+          <button class="danger" onclick="deleteSubject()">3. Delete Customer</button>
+          <button class="secondary" onclick="refreshAll()">Refresh</button>
+        </div>
+      </div>
+      <div id="notice" class="notice"></div>
+      <div class="content">
+        <div class="column">
+          <h3>Visible memories</h3>
+          <div id="memories" class="empty">กด “Reset & Seed” เพื่อสร้างความจำจาก Support Agent</div>
+        </div>
+        <div class="column">
+          <h3>Memory audit trail</h3>
+          <div id="audit" class="empty">Audit จะปรากฏหลังเริ่มเดโม</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+  const API = `${location.protocol}//${location.hostname}:8000`;
+  const subjectId = "CUST-1001";
+  const headers = (agent, role) => ({
+    "Content-Type": "application/json",
+    "X-Tenant-ID": "nt-demo",
+    "X-Agent-ID": agent,
+    "X-Agent-Role": role
+  });
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+  }
+
+  function notify(message, error=false) {
+    const el = document.getElementById("notice");
+    el.style.display = "block";
+    el.style.background = error ? "#fff0f0" : "#eef5ff";
+    el.style.color = error ? "#9c1c1c" : "#204276";
+    el.textContent = message;
+  }
+
+  async function call(path, options={}) {
+    const response = await fetch(API + path, options);
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.detail || `HTTP ${response.status}`);
+    return body;
+  }
+
+  async function checkHealth() {
+    const el = document.getElementById("apiStatus");
+    try {
+      await call("/health");
+      el.textContent = "● API Online";
+    } catch (error) {
+      el.textContent = "● API Offline";
+      el.style.color = "#c92a2a";
+      el.style.background = "#fff0f0";
+    }
+  }
+
+  async function seedDemo() {
+    try {
+      await call(`/v1/subjects/${subjectId}/memories`, {method:"DELETE", headers:headers("demo-admin","admin")});
+      await call("/v1/memories", {
+        method:"POST", headers:headers("support-agent-qwen","support"),
+        body:JSON.stringify({
+          subject_id:subjectId, scope:"customer-continuity", type:"preference",
+          content:"ลูกค้ามี 3 สาขา ต้องการใบเสนอราคา และสะดวกให้ติดต่อหลัง 17:00",
+          source:"line-conversation-2026-07-21", confidence:0.97, sensitivity:"internal",
+          allowed_roles:["support","sales"], metadata:{channel:"LINE", consent:true}
+        })
+      });
+      await call("/v1/memories", {
+        method:"POST", headers:headers("support-agent-qwen","support"),
+        body:JSON.stringify({
+          subject_id:subjectId, scope:"support-private", type:"event",
+          content:"ลูกค้าเคยร้องเรียนรุนแรงและขอให้หัวหน้าทีมเป็นผู้รับผิดชอบเท่านั้น",
+          source:"support-ticket-8842", confidence:0.93, sensitivity:"restricted",
+          allowed_roles:["support"], metadata:{channel:"ticket", consent:false}
+        })
+      });
+      notify("สร้างความจำ 2 รายการแล้ว: รายการแรกแชร์ให้ Sales ได้ ส่วนรายการ restricted ถูกจำกัดเฉพาะ Support");
+      await salesRetrieve();
+    } catch (error) { notify(error.message, true); }
+  }
+
+  async function salesRetrieve() {
+    try {
+      const data = await call("/v1/memories/search", {
+        method:"POST", headers:headers("sales-agent-claude","sales"),
+        body:JSON.stringify({query:"สาขา ใบเสนอราคา ติดต่อ", subject_id:subjectId, limit:20})
+      });
+      renderMemories(data.results, data.denied_count);
+      notify(`Sales Agent อ่านได้ ${data.results.length} รายการ และถูกปฏิเสธ ${data.denied_count} รายการ`);
+      await loadAudit();
+    } catch (error) { notify(error.message, true); }
+  }
+
+  async function loadAudit() {
+    try {
+      const events = await call(`/v1/audit?subject_id=${subjectId}&limit=100`, {headers:headers("governance-dashboard","auditor")});
+      const target = document.getElementById("audit");
+      if (!events.length) { target.className="empty"; target.textContent="ยังไม่มี Audit"; return; }
+      target.className="";
+      target.innerHTML = events.map(event => {
+        const time = new Date(event.created_at).toLocaleTimeString("th-TH", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+        const outcome = event.outcome === "allowed" ? "allowed" : "denied";
+        return `<div class="log"><span class="muted">${time}</span><div><b>${escapeHtml(event.actor_agent_id)}</b><br><span class="muted">${escapeHtml(event.action)} · ${escapeHtml(event.reason || "policy passed")}</span></div><span class="${outcome}">${escapeHtml(event.outcome.toUpperCase())}</span></div>`;
+      }).join("");
+    } catch (error) { notify(error.message, true); }
+  }
+
+  function renderMemories(results, deniedCount) {
+    const target = document.getElementById("memories");
+    if (!results.length) {
+      target.className="empty";
+      target.innerHTML = `ไม่พบความจำที่ Sales Agent มีสิทธิ์อ่าน<br><span class="muted">Denied: ${deniedCount}</span>`;
+      return;
+    }
+    target.className="";
+    target.innerHTML = results.map(item => {
+      const m = item.memory;
+      const restricted = m.sensitivity === "restricted" ? "restricted" : "";
+      return `<article class="card"><div class="top"><div><span class="pill">${escapeHtml(m.type)}</span> <span class="pill ${restricted}">${escapeHtml(m.sensitivity)}</span></div><b>${Math.round(item.score*100)}%</b></div><div>${escapeHtml(m.content)}</div><p class="muted">Scope: ${escapeHtml(m.scope)} · Roles: ${escapeHtml(m.allowed_roles.join(", "))}</p></article>`;
+    }).join("") + `<p class="muted">Policy denied ${deniedCount} hidden memory record(s).</p>`;
+  }
+
+  async function deleteSubject() {
+    try {
+      const data = await call(`/v1/subjects/${subjectId}/memories`, {method:"DELETE", headers:headers("privacy-admin","admin")});
+      notify(`Right to be Forgotten สำเร็จ: ลบความจำ ${data.deleted_count} รายการ`);
+      await salesRetrieve();
+    } catch (error) { notify(error.message, true); }
+  }
+
+  async function refreshAll() { await salesRetrieve(); }
+  checkHealth();
+  loadAudit();
+</script>
+</body>
+</html>
