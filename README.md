@@ -4,7 +4,7 @@
 
 NT MemoryVault makes AI agents remember customers, cases, decisions, and work context across sessions, models, and channels—while enforcing tenant isolation, access policy, auditability, retention, and deletion.
 
-## MVP scope
+## MVP delivered
 
 - Persistent memory API
 - Cross-agent handover
@@ -13,7 +13,9 @@ NT MemoryVault makes AI agents remember customers, cases, decisions, and work co
 - Audit trail for read/write/deny/delete events
 - Right-to-be-forgotten by subject
 - Two-agent demo: Support Agent → Sales Agent
+- White + electric-blue governance dashboard
 - Local/private deployment with Docker Compose
+- GitHub Actions compile and FastAPI import check
 
 ## Quick start
 
@@ -22,9 +24,23 @@ cp .env.example .env
 docker compose up --build
 ```
 
-API documentation: `http://localhost:8000/docs`
+Open:
 
-Run the end-to-end demo:
+- Demo dashboard: `http://localhost:3000`
+- API documentation: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/health`
+
+For access through a server IP or domain, set `CORS_ORIGINS` in `.env` to the dashboard origin, for example `http://203.0.113.10:3000`.
+
+## 90-second demo
+
+The dashboard runs the complete story in three clicks:
+
+1. **Reset & Seed** — Support Agent using Qwen stores one shared customer preference and one restricted support note.
+2. **Sales Retrieve** — Sales Agent using another model receives only the approved context; the restricted memory is denied and logged.
+3. **Delete Customer** — Privacy Admin executes Right to be Forgotten; subsequent retrieval returns no customer memory.
+
+Command-line version:
 
 ```bash
 python demo/demo_flow.py
@@ -40,36 +56,41 @@ python demo/demo_flow.py
 | `DELETE` | `/v1/subjects/{subject_id}/memories` | Delete all memories for a subject |
 | `GET` | `/health` | Health check |
 
-Every request uses these headers:
+Every governed request uses:
 
 - `X-Tenant-ID`
 - `X-Agent-ID`
 - `X-Agent-Role`
 
+## Memory object
+
+Each record includes tenant, subject, source agent, scope, memory type, content, confidence, sensitivity, allowed roles, validity period, expiry, source, and metadata.
+
+The first MVP uses lexical relevance scoring so it runs without an external model. The next retrieval provider will use local embeddings through an OpenAI-compatible Qwen endpoint and PostgreSQL/pgvector.
+
 ## Product principle
 
 > AI remembers only what it should remember, shares only what it is allowed to share, and forgets when ordered to forget.
 
-## Initial architecture
+## Architecture
 
 ```text
 Agent / Application
         │
 FastAPI Memory API
         │
-Policy Engine ── Audit Log
-        │
-PostgreSQL + pgvector
+Policy Engine ───── Audit Trail
+        │                 │
+PostgreSQL / pgvector   Governance Dashboard
 ```
 
-## Roadmap
+## Next build order
 
-1. MVP API, policy, audit, deletion
-2. Semantic embeddings through local Qwen/OpenAI-compatible endpoint
-3. Memory consolidation and conflict resolution
-4. Web governance dashboard
-5. MCP, LangChain, LlamaIndex, and Agent framework adapters
-6. AD/LDAP, SIEM, BYOK, private network, dedicated tenant
+1. Local Qwen embedding provider + pgvector semantic retrieval
+2. Memory consolidation, conflict resolution, and superseding records
+3. MCP server and framework adapters
+4. API keys, JWT, AD/LDAP, and per-tenant policy administration
+5. SIEM export, BYOK encryption, retention jobs, and dedicated tenant deployment
 
 ## License
 
